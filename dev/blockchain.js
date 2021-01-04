@@ -18,3 +18,8 @@ Blockchain.prototype.createNewBlock = (nonce, previousBlockHash, hash) => {
 
     return newBlock;
 }
+
+
+
+
+module.exports = Blockchain;
