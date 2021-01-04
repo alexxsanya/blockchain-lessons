@@ -3,7 +3,7 @@ function Blockchain(){
     this.newTransaction = []; // hold new transaction that a created before they are mined
 }
 
-Blockchain.prototype.createNewBlock = (nonce, previousBlockHash, hash) => {
+Blockchain.prototype.createNewBlock = function(nonce, previousBlockHash, hash){
     const newBlock = {
         index: this.chain.length + 1, //basically the block number in the chain,
         timestamp: Date.now(), //when the block was created
