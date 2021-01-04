@@ -1,3 +1,5 @@
+const sha256 =require('sha256');
+
 function Blockchain(){
     this.chain = [];  // all the blocks will be stored in here
     this.pendingTransaction = []; // hold new transaction that a created before they are mined/validated
@@ -34,6 +36,14 @@ Blockchain.prototype.createNewTransaction = function(amount, sender, recipient){
     
     //this returns the block number that this transaction will be added to
     return this.getLastBlock()['index'] + 1
+}
+
+Blockchain.prototype.hashBlock = function(previousBlockHash, currentBlockData, nonce) {
+    const dataAsString = previousBlockHash + nonce.toString() + JSON.stringify(currentBlockData);
+    const hash = sha256(dataAsString);
+
+    return hash;
+
 }
 
 
