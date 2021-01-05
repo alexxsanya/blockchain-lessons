@@ -54,14 +54,23 @@ Blockchain.prototype.proofOfWork = function(previousBlockHash, currentBlockData)
      * 
      * How this secures the block chain
      * - Remeber to generate the desired hash starting with the 4 zero 
-     * we are going to generate the hash over 10s of thousand time to get one
+     * we are going to generate the hash upto 10s of thousand time to get one has with 1st 4 zero
      * which will use a lot of computing power.
      * Therefore, if an individual wats to modify the previous entered bloc, one will have to try regenerate
      * the hash which will take lots of time & energy -> which is not feasible
      * And since the blocks contain a previous hash, that would mean one will need to do a proof of work for all previous block which is not feasible
+     * A PROOF OF WORK IS SUPPOSED TO BE VERY DIFFICULT TO CALCULATE.
      */
 
-     
+    let nonce = 0;
+    let hash = this.hashBlock(previousBlockHash, currentBlockData, nonce);
+
+    while(hash.substring(0,4) !== '0000'){
+        nonce++;
+        hash = this.hashBlock(previousBlockHash, currentBlockData, nonce);
+    }
+    //this the nonce which generates the hash with 4 zero, so it acts as our proof
+    return nonce; 
 }
 
 module.exports = Blockchain;
