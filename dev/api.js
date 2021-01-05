@@ -17,7 +17,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 // fetch entire blockchain
 app.get('/blockchain', function(req, res){
-
+    res.send(bitcoin);
 });
 
 
