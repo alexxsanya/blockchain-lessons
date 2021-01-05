@@ -3,6 +3,15 @@ const sha256 =require('sha256');
 function Blockchain(){
     this.chain = [];  // all the blocks will be stored in here
     this.pendingTransaction = []; // hold new transaction that a created before they are mined/validated
+
+    /**
+     * Creating the Genesis Block
+     * - remember that the genesis block doesnt have the previousBlockHash
+     * - we basically create a block with arbitrary values like createNewBlock(100, '0', '0')
+     */
+
+     this.createNewBlock(200, '0', '0');
+
 }
 
 Blockchain.prototype.createNewBlock = function(nonce, previousBlockHash, hash){
