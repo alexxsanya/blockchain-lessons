@@ -8,6 +8,9 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser')
+const Blockchain = require('./blockchain')
+
+const bitcoin = new Blockchain()
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
