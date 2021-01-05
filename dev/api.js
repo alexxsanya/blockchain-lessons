@@ -23,7 +23,10 @@ app.get('/blockchain', function(req, res){
 
 //create a new transaction on the blockchain
 app.post('/transaction', function(req, res){
-    res.send(req.body)
+    const blockIndex = bitcoin.createNewTransaction(req.body.amount, req.body.sender, req.body.recipient)
+    res.json({
+        note: `Transaction will be added in block ${blockIndex}.`
+    })
 });
 
 // create or mine a new block
