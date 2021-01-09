@@ -115,7 +115,7 @@ app.post('/register-and-broadcast-node', function(req, res){
 })
 
 
-//register a node with the node on the existing on the network
+//register a new node by the node on the existing on the network
 app.post('/register-node', function(req, res){
     const newNodeUrl = req.body.newNodeUrl;
     const nodeNotAlreadyPresent = bitcoin.networkNodes.indexOf(newNodeUrl) == -1;
