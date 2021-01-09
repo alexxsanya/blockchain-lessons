@@ -127,8 +127,20 @@ app.post('/register-node', function(req, res){
 
 })
 
-// register multiple nodes at once
+// register multiple nodes at once. its only hint on a new node
 app.post('/register-nodes-bullk', function(req, res){
+    const  allNetworkNodes = req.body.allNetworkNodes;
+
+    //Loop throu the array and register it with the node
+    allNetworkNodes.forEach(networkNodeUrl => {
+        const nodeNotAlreadyPresent = bitcoin.networkNodes.indexOf(networkNodeUrl) == -1
+        const notCurrentNode = bitcoin.currentNodeUrl != networkNodeUrl
+
+        if(nodeNotAlreadyPresent && notCurrentNode) bitcoin.networkNodes.push(networkNodeUrl);
+
+    });
+
+    res.json({note: 'Bulk registration successful'})
 
 });
  
