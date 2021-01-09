@@ -10,7 +10,7 @@ const app = express();
 const bodyParser = require('body-parser')
 const Blockchain = require('./blockchain')
 const uuid = require('uuid');
-
+const port = process.argv[2];
 const nodeAddress = uuid.v1().split('-').join(''); //mock ID of the node mining the bitcoin
 const bitcoin = new Blockchain()
 
@@ -64,6 +64,6 @@ app.get('/mine', function(req, res){
 
 })
 
-app.listen(4600, function(){
-    console.log('>>> Listening on port 4600 ')
+app.listen(port, function(){
+    console.log(`>>> Listening on port ${port} `)
 });
