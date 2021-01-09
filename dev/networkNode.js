@@ -97,12 +97,12 @@ app.post('/register-and-broadcast-node', function(req, res){
             // We sent a request to the new node to register all the existing nodes
 
             const bulkRegisterOptions = {
-                uri: newNodeUrl + '/register-nodes-bulks',
-                methods:'POST',
+                uri: newNodeUrl + '/register-nodes-bulk',
+                method: 'POST',
                 body: {
                     allNetworkNodes: [...bitcoin.networkNodes, bitcoin.currentNodeUrl],
-                    json:true
-                }
+                },
+                json:true
             };
 
             return rp(bulkRegisterOptions)
@@ -111,6 +111,9 @@ app.post('/register-and-broadcast-node', function(req, res){
             res.json({
                 note: 'New node registered with network successfully'
             })
+        })
+        .catch(err=>{
+            res.status(500).send({err})
         })
 })
 
@@ -128,7 +131,7 @@ app.post('/register-node', function(req, res){
 })
 
 // register multiple nodes at once. its only hint on a new node
-app.post('/register-nodes-bullk', function(req, res){
+app.post('/register-nodes-bulk', function(req, res){
     const  allNetworkNodes = req.body.allNetworkNodes;
 
     //Loop throu the array and register it with the node
