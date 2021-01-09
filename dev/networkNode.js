@@ -12,7 +12,8 @@ const Blockchain = require('./blockchain')
 const uuid = require('uuid');
 const port = process.argv[2];
 const nodeAddress = uuid.v1().split('-').join(''); //mock ID of the node mining the bitcoin
-const bitcoin = new Blockchain()
+const bitcoin = new Blockchain();
+const rp = require('request-promise');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
@@ -66,6 +67,51 @@ app.get('/mine', function(req, res){
 //register a node and broadcast it to the entire network
 app.post('/register-and-broadcast-node', function(req, res){
     const newNodeUrl = req.body.newNodeUrl;
+    //register on this node if the node does not already exist
+    if(bitcoin.networkNodes.indexOf(newNodeUrl) == -1){
+        bitcoin.networkNodes.push(newNodeUrl);
+    }
+
+    const regNodePromises = []  //contains all requests
+
+    //broadcast new node to other nodes in the network
+    bitcoin.networkNodes.forEach(networkNodeUrl =>{
+        //hint the /register-node endpoint
+        const requestOptions = {
+            uri: networkNodeUrl + '/register-node',
+            method: 'POST',
+            body: {
+                newNodeUrl: newNodeUrl
+            },
+            json: true
+        }
+
+        regNodePromises.push(rp(requestOptions))
+
+    });
+    
+    // Broadcast request is made here
+    Promise.all(regNodePromises)
+        .then(data => {
+            //returns data when all our requests return an response
+            // We sent a request to the new node to register all the existing nodes
+
+            const bulkRegisterOptions = {
+                uri: newNodeUrl + '/register-nodes-bulks',
+                methods:'POST',
+                body: {
+                    allNetworkNodes: [...bitcoin.networkNodes, bitcoin.currentNodeUrl],
+                    json:true
+                }
+            };
+
+            return rp(bulkRegisterOptions)
+        })
+        .then(data =>{
+            res.json({
+                note: 'New node registered with network successfully'
+            })
+        })
 })
 
 
