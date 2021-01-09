@@ -1,9 +1,13 @@
 const sha256 =require('sha256');
+const currentNodeUrl = process.argv[3];
 
 function Blockchain(){
     this.chain = [];  // all the blocks will be stored in here
     this.pendingTransactions = []; // hold new transaction that a created before they are mined/validated
-
+    
+    this.currentNodeUrl = currentNodeUrl
+    this.networkNodes = []
+    
     /**
      * Creating the Genesis Block
      * - remember that the genesis block doesnt have the previousBlockHash
