@@ -63,7 +63,22 @@ app.get('/mine', function(req, res){
     });
 
 })
+//register a node and broadcast it to the entire network
+app.post('/register-and-broadcast-node', function(req, res){
+    const newNodeUrl = req.body.newNodeUrl;
+})
 
+
+//register a node with the network by the existing on the network
+app.post('/register-node', function(req, res){
+
+})
+
+// register multiple nodes at once
+app.post('/register-nodes-bullk', function(req, res){
+
+});
+ 
 app.listen(port, function(){
     console.log(`>>> Listening on port ${port} `)
 });
