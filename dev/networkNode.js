@@ -84,21 +84,51 @@ app.get('/mine', function(req, res){
     const blockHash = bitcoin.hashBlock(previousBlockHash,currentBlockData,nonce);
 
 
-    /**
-     * Rem: every time that mines a block successfully they do get a reward for mining it.
-     * 12.5 is the current reward for mining on bitcoin network
-     * 00 - the sender address used for use to know that this is a reward transaction
-     * nodeAddress - is the unique address of the node running this mining
-    */
-
-    bitcoin.createNewTransaction(12.5, "00", nodeAddress );
 
     const newBlock = bitcoin.createNewBlock(nonce, previousBlockHash, blockHash);
 
-    res.json({
-        note: `New block mined successfully`,
-        block: newBlock
+    // broadcast the new block to the network
+    const requestPromises = []
+    bitcoin.networkNodes.forEach(networkNodeUrl => {
+        const requestOptions = {
+            uri: networkNodeUrl + '/recieve-new-block',
+            method: 'POST',
+            body: newBlock,
+            json: true
+        }
+
+        requestPromises.push(rp(requestOptions));
+
     });
+
+    Promise.all(requestPromises)
+    .then(data => {
+        /**
+         * Rem: every time that mines a block successfully they do get a reward for mining it.
+         * 12.5 is the current reward for mining on bitcoin network
+         * 00 - the sender address used for use to know that this is a reward transaction
+         * nodeAddress - is the unique address of the node running this mining
+        */
+        //boadcast a mining reward transaction on this node
+        const requestOptions = {
+            uri: bitcoin.currentNodeUrl + '/transaction/broadcast',
+            method: 'POST',
+            body: {
+                amount: 12.5,
+                sender: "00",
+                recipient: nodeAddress
+            }
+        };
+
+        return rp(requestOptions)
+
+    })
+    .then(data => {
+        res.json({
+            note: `New block mined & broadcast successfully`,
+            block: newBlock
+        });
+    })
 
 })
 //register a node and broadcast it to the entire network
