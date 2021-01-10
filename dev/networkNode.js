@@ -24,9 +24,11 @@ app.get('/blockchain', function(req, res){
 });
 
 
-//create a new transaction on the blockchain
+// this will now be hint by other transaction to add the transaction to its array/store
 app.post('/transaction', function(req, res){
-    const blockIndex = bitcoin.createNewTransaction(req.body.amount, req.body.sender, req.body.recipient)
+    const newTransaction = req.body;
+    const blockIndex = bitcoin.addTransactionToPendingTransactions(newTransaction);
+
     res.json({
         note: `Transaction will be added in block ${blockIndex}.`
     })
@@ -38,12 +40,15 @@ app.post('/transaction', function(req, res){
  * It will do 2 things. create a transaction & 2. broadcast it to the sender
  */
 app.post('/transaction/broadcast', function(req, res){
-    const newTransaction = bitcoin.createNewTransaction(req.body.amount, req.body.sender, req.body.recipient)
+    /** 
+     *  create a new transaction
+     *  add transaction to pending Transaction array (store) on the current node
+    */
 
-    //add transaction to pending Transaction array (store)
+    const newTransaction = bitcoin.createNewTransaction(req.body.amount, req.body.sender, req.body.recipient)
     bitcoin.addTransactionToPendingTransactions(newTransaction);
 
-    //send a broadcast to the other nodes in the network.
+    //then send a broadcast to the other nodes in the network.
     const requestPromises =  []
 
     bitcoin.networkNodes.forEach(networkNodeUrl => {
@@ -54,7 +59,7 @@ app.post('/transaction/broadcast', function(req, res){
             json: true
         }
 
-        reqPromises.push(rp(requestOptions))
+        requestPromises.push(rp(requestOptions))
     });
 
     Promise.all(requestPromises)
