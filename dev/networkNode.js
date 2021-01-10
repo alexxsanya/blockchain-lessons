@@ -69,8 +69,10 @@ app.post('/transaction/broadcast', function(req, res){
 
 })
 
-// create or mine a new block
-app.get('/mine', function(req, res){
+/**
+ *  create or mine a new block
+ * */
+app.get('/mine', async function(req, res){
     const lastBlock = bitcoin.getLastBlock();
     const previousBlockHash = lastBlock['hash'];
 
@@ -81,17 +83,17 @@ app.get('/mine', function(req, res){
 
     const nonce = bitcoin.proofOfWork(previousBlockHash, currentBlockData );
 
-    const blockHash = bitcoin.hashBlock(previousBlockHash,currentBlockData,nonce);
+    const blockHash = await bitcoin.hashBlock(previousBlockHash,currentBlockData,nonce);
 
 
 
-    const newBlock = bitcoin.createNewBlock(nonce, previousBlockHash, blockHash);
+    const newBlock = await bitcoin.createNewBlock(nonce, previousBlockHash, blockHash);
 
     // broadcast the new block to the network
     const requestPromises = []
     bitcoin.networkNodes.forEach(networkNodeUrl => {
         const requestOptions = {
-            uri: networkNodeUrl + '/recieve-new-block',
+            uri: networkNodeUrl + '/receive-new-block',
             method: 'POST',
             body: newBlock,
             json: true
@@ -117,7 +119,8 @@ app.get('/mine', function(req, res){
                 amount: 12.5,
                 sender: "00",
                 recipient: nodeAddress
-            }
+            },
+            json: true
         };
 
         return rp(requestOptions)
@@ -129,13 +132,46 @@ app.get('/mine', function(req, res){
             block: newBlock
         });
     })
+    .catch(error => {
+        res.status(500).send({error})
+    })
 
 })
+
+/**
+ * receive a new block
+ * However before a new block is added,  the node needs to validate the incoming block
+ * 1. check if its previous hash is the same as it has
+ * 2. the new block must have it index greater than that of the previous block in the chain
+*/
+app.post('/receive-new-block', function(req, res) {
+    const newBlock = req.body;
+    const lastBlock = bitcoin.getLastBlock();
+    const correctHash = lastBlock.hash == newBlock.previousBlockHash;
+    const correctIndex = lastBlock['index'] + 1 === newBlock['index'];
+
+    if(correctHash && correctIndex) {
+        bitcoin.chain.push(newBlock);
+        //since we added a block to our chain, means we have to clear our pendingTransactions
+        bitcoin.pendingTransactions = [];
+
+        res.json({
+            note: 'New block received and accepted',
+            newBlock: newBlock
+        })
+    }else{
+        res.json({
+            note: 'New block rejected',
+            newBlock: newBlock
+        })
+    }
+})
+
 //register a node and broadcast it to the entire network
 app.post('/register-and-broadcast-node', function(req, res){
     const newNodeUrl = req.body.newNodeUrl;
     //register on this node if the node does not already exist
-    if(bitcoin.networkNodes.indexOf(newNodeUrl) == -1){
+    if(bitcoin.networkNodes.indexOf(newNodeUrl) == -1 && bitcoin.networkNodes!==null){
         bitcoin.networkNodes.push(newNodeUrl);
     }
 
