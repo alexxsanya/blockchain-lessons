@@ -32,6 +32,38 @@ app.post('/transaction', function(req, res){
     })
 });
 
+/**
+ * Any time we create a transaction, we are going to hint this endpoint
+ * to send a broadcast to the rest of the nodes in the network to record this transaction.
+ * It will do 2 things. create a transaction & 2. broadcast it to the sender
+ */
+app.post('/transaction/broadcast', function(req, res){
+    const newTransaction = bitcoin.createNewTransaction(req.body.amount, req.body.sender, req.body.recipient)
+
+    //add transaction to pending Transaction array (store)
+    bitcoin.addTransactionToPendingTransactions(newTransaction);
+
+    //send a broadcast to the other nodes in the network.
+    const requestPromises =  []
+
+    bitcoin.networkNodes.forEach(networkNodeUrl => {
+        const requestOptions = {
+            uri: networkNodeUrl + '/transaction',
+            method: 'POST',
+            body: newTransaction,
+            json: true
+        }
+
+        reqPromises.push(rp(requestOptions))
+    });
+
+    Promise.all(requestPromises)
+    .then(data => {
+        res.json({note: 'Transaction created and broadcast successfully.'})
+    })
+
+})
+
 // create or mine a new block
 app.get('/mine', function(req, res){
     const lastBlock = bitcoin.getLastBlock();
