@@ -250,6 +250,57 @@ app.post('/register-nodes-bulk', function(req, res){
 
 });
  
+/***
+ * We make a request to all nodes on the network to get their copy blockchain
+ * and compare them with the copy of the blockchain on which the endpoint is running
+*/
+app.get('/consensus', function(req, res){
+    const requestPromises = []
+    bitcoin.networkNodes.forEach(networkNodeUrl => {
+        const requestOptions = {
+            uri: networkNodeUrl + '/blockchain',
+            method: 'GET',
+            json: true
+        }
+        //returns an array with the block of the various nodes
+        requestPromises.push(rp(requestOptions));
+    });
+
+    Promise.all(requestPromises)
+    .then(blockchains => {
+        //check if there is a blockchain longer than the blockchain on this node
+        const currentChainLength = bitcoin.chain.length;
+        let maxChainLength = currentChainLength; //initial length;
+        let newLongestChain = null;
+        let newPendingTransactions = null;
+
+        blockchains.forEach(blockchain => {
+            if(blockchain.chain.length > maxChainLength){
+                maxChainLength = blockchain.chain.length;
+                newLongestChain = blockchain.chain
+                newPendingTransactions = blockchain.pendingTransactions;
+            }
+        })
+
+        if(!newLongestChain || (newLongestChain && !bitcoin.chainIsValid(newLongestChain))){
+            res.json({
+                note: 'Current chain has not been replaced',
+                chain: bitcoin.chain
+            })
+        }
+        else if(newLongestChain && bitcoin.chainIsValid(newLongestChain)){
+            //now we replace the current chain with the new longest chain and pending transaction
+            bitcoin.chain = newLongestChain;
+            bitcoin.pendingTransactions = newPendingTransactions;
+
+            res.json({
+                note: 'Current chain has been replaced',
+                chain: bitcoin.chain
+            })
+        }
+    })
+})
+
 app.listen(port, function(){
     console.log(`>>> Listening on port ${port} `)
 });
