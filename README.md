@@ -34,5 +34,12 @@ To demonstrate decentralized network of nodes we are going to:-
 ```
 5. Run GET `/mine` to create a new block (mine)
 
-## Note
+### Note
 After registering all the nodes, you can run the `/mine`, `/transaction/broadcast` and records will be synced accross the network
+
+
+6. Run `/consensus` to correct a node to have the correct data
+- simply it calls all blockchain of the nodes in the network
+- looks for the longest blockchain
+- validates the chain
+- then replaces it chain if their is a longest than its own
