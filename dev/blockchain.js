@@ -93,4 +93,26 @@ Blockchain.prototype.proofOfWork = function(previousBlockHash, currentBlockData)
     return nonce; 
 }
 
+/***
+ * validate whether 
+ * How ?
+ * - Iterate through all the blocks and ensure all the hashs line up correctly
+ * - comparing previous hash with current hash
+*/
+Blockchain.prototype.chainIsValid = function(blockchain) {
+    let validChain = true;
+
+    for(var i=1; i < blockchain.length; i++) {
+        const currentBlock = blockchain[i];
+        const prevBlock = blockchain[i - 1];
+
+        if(currentBlock['previousBlockHash'] !== prevBlock['hash']){
+            //then the chain is not valid
+            validChain = false;
+        }
+    }
+
+    return validChain;
+}
+
 module.exports = Blockchain;
