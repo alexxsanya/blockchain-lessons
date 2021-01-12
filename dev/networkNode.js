@@ -325,7 +325,14 @@ app.get('/transaction/:transactionId', function(req, res){
     })
 });
 
+//returns all the transactions of a specified address
 app.get('/address/:address', function(req, res){
+    const address = req.params.address;
+    const addressData = bitcoin.getAddressData(address);
+
+    res.json({
+        addressData: addressData
+    })
 
 });
 
