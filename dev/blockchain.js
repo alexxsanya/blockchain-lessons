@@ -135,7 +135,7 @@ Blockchain.prototype.getBlock = function(blockHash) {
     let correctBlock = null;
 
     this.chain.forEach(block => {
-        if(block.hash === this.hashBlock) correctBlock = block;
+        if(block.hash === blockHash) correctBlock = block;
     });
 
     return correctBlock;
