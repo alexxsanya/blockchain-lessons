@@ -146,7 +146,7 @@ Blockchain.prototype.getTransaction = function(transactionId) {
     let correctBlock = null;
     this.chain.forEach(block => {
         block.transactions.forEach(transaction => {
-            if(transaction.id === transactionId){
+            if(transaction.transactionId === transactionId){
                 correctTransaction = transaction;
                 correctBlock = block;
             }
